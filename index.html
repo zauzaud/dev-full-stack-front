@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GameVault - Minha Colecao de Games</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Efeito de particulas no background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <span class="logo-icon">🎮</span>
+          <h1>Game<span class="highlight">Vault</span></h1>
+        </div>
+
+        <!-- Botoes de Acao -->
+        <div class="header-actions">
+          <button class="action-btn" id="open-modal-btn" title="Novo Jogo">
+            <span class="action-icon">🎮</span>
+            <span class="action-text">Novo Jogo</span>
+          </button>
+          <button class="action-btn" id="open-platform-modal-btn" title="Nova Plataforma">
+            <span class="action-icon">🖥️</span>
+            <span class="action-text">Nova Plataforma</span>
+          </button>
+          <button class="action-btn" id="open-genre-modal-btn" title="Novo Genero">
+            <span class="action-icon">🏷️</span>
+            <span class="action-text">Novo Genero</span>
+          </button>
+        </div>
+
+        <!-- Estatisticas -->
+        <nav class="nav-stats">
+          <div class="stat-item">
+            <span class="stat-number" id="total-games">0</span>
+            <span class="stat-label">Total</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" id="completed-games">0</span>
+            <span class="stat-label">Zerados</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" id="playing-games">0</span>
+            <span class="stat-label">Jogando</span>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+      <!-- Sidebar com Filtros -->
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <h3 class="sidebar-title"><span class="icon">🔍</span> Buscar</h3>
+          <div class="search-box">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Nome do jogo..."
+              autocomplete="off"
+            />
+            <button class="search-btn" id="search-btn">
+              <span>&#8981;</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">
+            <span class="icon">🏷️</span> Filtrar por Status
+          </h3>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="playing">🎮 Jogando</button>
+            <button class="filter-btn" data-filter="completed">
+              &#10004; Zerado
+            </button>
+            <button class="filter-btn" data-filter="backlog">
+              &#128203; Backlog
+            </button>
+            <button class="filter-btn" data-filter="abandoned">
+              &#10006; Abandonado
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="sidebar-title"><span class="icon">🎯</span> Plataforma</h3>
+          <div class="filter-buttons platform-filters" id="platform-filters">
+            <button class="filter-btn platform-btn active" data-platform="all">
+              Todas
+            </button>
+            <!-- Plataformas serao carregadas dinamicamente -->
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">
+            <span class="icon">&#127917;</span> Genero
+          </h3>
+          <div class="filter-buttons genre-filters" id="genre-filters">
+            <button class="filter-btn genre-btn active" data-genre="all">
+              Todos
+            </button>
+            <!-- Generos serao carregados dinamicamente -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- Content Area -->
+      <section class="content">
+        <!-- Loading State -->
+        <div class="loading-container" id="loading">
+          <div class="loader"></div>
+          <p>Carregando sua colecao...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display: none">
+          <div class="empty-icon">🎮</div>
+          <h2>Sua colecao esta vazia!</h2>
+          <p>Comece adicionando os jogos que voce ja jogou.</p>
+          <button class="add-game-btn" id="empty-add-btn">
+            <span class="btn-icon">+</span>
+            <span>Adicionar Primeiro Jogo</span>
+          </button>
+        </div>
+
+        <!-- Games Grid -->
+        <div class="games-grid" id="games-grid"></div>
+      </section>
+    </main>
+
+    <!-- Modal Adicionar/Editar Jogo -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="modal-title">Adicionar Novo Jogo</h2>
+          <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <form id="game-form" class="game-form">
+          <input type="hidden" id="game-id" />
+
+          <div class="form-group">
+            <label for="game-title">Titulo do Jogo *</label>
+            <input
+              type="text"
+              id="game-title"
+              required
+              placeholder="Ex: The Legend of Zelda"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="game-description">Descricao</label>
+            <textarea
+              id="game-description"
+              rows="2"
+              placeholder="Breve descricao do jogo..."
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="game-genre">Genero</label>
+              <select id="game-genre">
+                <option value="">Selecione...</option>
+                <!-- Opcoes carregadas dinamicamente -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="game-status">Status *</label>
+              <select id="game-status" required>
+                <option value="">Selecione...</option>
+                <option value="playing">🎮 Jogando</option>
+                <option value="completed">&#10004; Zerado</option>
+                <option value="backlog">&#128203; Backlog</option>
+                <option value="abandoned">&#10006; Abandonado</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="game-platforms">Plataformas</label>
+            <div class="checkbox-group" id="game-platforms">
+              <!-- Checkboxes carregados dinamicamente -->
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="game-rating">Nota (0-10)</label>
+              <input
+                type="number"
+                id="game-rating"
+                min="0"
+                max="10"
+                step="0.5"
+                placeholder="8.5"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="game-hours">Horas Jogadas</label>
+              <input
+                type="number"
+                id="game-hours"
+                min="0"
+                step="0.5"
+                placeholder="Ex: 45"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="game-release-date">Data de Lancamento</label>
+              <input type="date" id="game-release-date" />
+            </div>
+
+            <div class="form-group">
+              <label for="game-cover">URL da Capa</label>
+              <input
+                type="url"
+                id="game-cover"
+                placeholder="https://exemplo.com/capa.jpg"
+              />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="cancel-btn">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <span id="submit-text">Salvar Jogo</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Detalhes do Jogo -->
+    <div class="modal-overlay" id="detail-modal-overlay">
+      <div class="modal detail-modal">
+        <button class="modal-close" id="detail-modal-close">&times;</button>
+        <div class="detail-content" id="detail-content">
+          <!-- Conteudo sera preenchido via JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Nova Plataforma -->
+    <div class="modal-overlay" id="platform-modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Gerenciar Plataformas</h2>
+          <button class="modal-close" id="platform-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <!-- Formulario Nova Plataforma -->
+          <form id="platform-form" class="game-form">
+            <div class="form-group">
+              <label for="platform-name">Nome da Plataforma *</label>
+              <input
+                type="text"
+                id="platform-name"
+                required
+                placeholder="Ex: PlayStation 5"
+              />
+            </div>
+            <div class="form-group">
+              <label for="platform-manufacturer">Fabricante</label>
+              <input
+                type="text"
+                id="platform-manufacturer"
+                placeholder="Ex: Sony"
+              />
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <span>+ Adicionar Plataforma</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Accordion Lista de Plataformas -->
+          <div class="accordion">
+            <button class="accordion-header" id="platforms-accordion-btn">
+              <span>&#128203; Plataformas Cadastradas</span>
+              <span class="accordion-icon">&#9660;</span>
+            </button>
+            <div class="accordion-content" id="platforms-accordion-content">
+              <div class="accordion-list" id="platforms-list">
+                <!-- Lista carregada via JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Novo Genero -->
+    <div class="modal-overlay" id="genre-modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Gerenciar Generos</h2>
+          <button class="modal-close" id="genre-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <!-- Formulario Novo Genero -->
+          <form id="genre-form" class="game-form">
+            <div class="form-group">
+              <label for="genre-name">Nome do Genero *</label>
+              <input
+                type="text"
+                id="genre-name"
+                required
+                placeholder="Ex: RPG"
+              />
+            </div>
+            <div class="form-group">
+              <label for="genre-description">Descricao</label>
+              <input
+                type="text"
+                id="genre-description"
+                placeholder="Ex: Role Playing Game"
+              />
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <span>+ Adicionar Genero</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Accordion Lista de Generos -->
+          <div class="accordion">
+            <button class="accordion-header" id="genres-accordion-btn">
+              <span>&#128203; Generos Cadastrados</span>
+              <span class="accordion-icon">&#9660;</span>
+            </button>
+            <div class="accordion-content" id="genres-accordion-content">
+              <div class="accordion-list" id="genres-list">
+                <!-- Lista carregada via JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmacao -->
+    <div class="modal-overlay" id="confirm-modal-overlay">
+      <div class="modal confirm-modal">
+        <div class="confirm-icon" id="confirm-icon">&#9888;</div>
+        <h2 class="confirm-title" id="confirm-title">Confirmar acao</h2>
+        <p class="confirm-message" id="confirm-message">Tem certeza que deseja continuar?</p>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" id="confirm-cancel-btn">Cancelar</button>
+          <button class="btn btn-danger" id="confirm-ok-btn">Confirmar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>GameVault - 2025 - MVP Desenvolvimento Full Stack</p>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
